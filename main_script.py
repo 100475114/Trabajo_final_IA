@@ -1,14 +1,15 @@
 
 from MFIS_Classes import *
 from MFIS_Read_Functions import *
-
+import os
 
 def main():
     # read files
     inputFuzzySets = readFuzzySetsFile('InputVarSets.txt')
     outputFuzzySets = readFuzzySetsFile('Risks.txt')
+    #Dibujar las funciones de pertenencia
     plot_fuzzy_sets_by_category(inputFuzzySets)
-    #plot_output_fuzzy_sets(outputFuzzySets)
+    plot_fuzzy_sets_by_category(outputFuzzySets)
     rules = readRulesFile()
     applications = readApplicationsFile()
     # process all the applications and write Rests file
@@ -17,7 +18,6 @@ def main():
         centroid = processApplication(application, inputFuzzySets, outputFuzzySets, rules)
         outputFile.write(application.appId + " " + str(centroid)+ "\n")
     outputFile.close()
-    plt.show()
 
 
 def fuzzify(app, inputFuzzySets):
@@ -39,7 +39,6 @@ def evaluateConsequent(rule, outputFuzzySets):
 def composition(rule, appOutY):
     return np.maximum(rule.consequentY, appOutY)
 
-import os
 
 def processApplication(app, inputFuzzySets, outputFuzzySets, rules):
     appOutX = outputFuzzySets[list(outputFuzzySets.keys())[0]].x  # Assuming all output fuzzy sets share the same universe
@@ -56,25 +55,13 @@ def processApplication(app, inputFuzzySets, outputFuzzySets, rules):
         appOutY = composition(r, appOutY)
     # step 3: defuzzification
     centroid = skf.centroid(appOutX, appOutY)
-
-    # Plot the aggregated function for each application
-    plt.figure()
-    plt.plot(appOutX, appOutY, label='Aggregated Function')
-    plt.title(f'Aggregated Function for Application {app.appId}')
-    plt.xlabel('Universe')
-    plt.ylabel('Membership Degree')
-    plt.legend()
-    if not os.path.exists('figuras'):
-        os.makedirs('figuras')
-    plt.savefig(f'figuras/Aggregated_Function_{app.appId}.png')
-    plt.close()
+    plot_output_fuzzy_sets(appOutX, appOutY, app)
     return (centroid)
 
 
 def plot_fuzzy_sets_by_category(fuzzy_sets):
     # Encuentra las categorías únicas
     categories = set(fs.var for fs in fuzzy_sets.values())
-
     # Graficar cada categoría en una figura separada
     for category in categories:
         plt.figure(figsize=(8, 4))
@@ -85,10 +72,22 @@ def plot_fuzzy_sets_by_category(fuzzy_sets):
         plt.xlabel("Universe")
         plt.ylabel("Membership degree")
         plt.legend()
-        if not os.path.exists('figuras'):
-            os.makedirs('figuras')
-        plt.savefig(f'figuras/Fuzzy_Sets_{category}.png')
+        if not os.path.exists('variables_fuzzificadas'):
+            os.makedirs('variables_fuzzificadas')
+        plt.savefig(f'variables_fuzzificadas/Fuzzy_Sets_{category}.png')
         plt.close()
+def plot_output_fuzzy_sets(appOutX, appOutY, app):
+    # Plot the aggregated function for each application
+    plt.figure()
+    plt.plot(appOutX, appOutY, label='Aggregated Function')
+    plt.title(f'Aggregated Function for Application {app.appId}')
+    plt.xlabel('Universe')
+    plt.ylabel('Membership Degree')
+    plt.legend()
+    if not os.path.exists('figuras_agregadas'):
+        os.makedirs('figuras_agregadas')
+    plt.savefig(f'figuras_agregadas/Aggregated_Function_{app.appId}.png')
+    plt.close()
 
 main()
 
