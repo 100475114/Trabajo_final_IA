@@ -7,6 +7,8 @@ def main():
     # read files
     inputFuzzySets = readFuzzySetsFile('InputVarSets.txt')
     outputFuzzySets = readFuzzySetsFile('Risks.txt')
+    plot_fuzzy_sets_by_category(inputFuzzySets)
+    #plot_output_fuzzy_sets(outputFuzzySets)
     rules = readRulesFile()
     applications = readApplicationsFile()
     # process all the applications and write Rests file
@@ -15,6 +17,7 @@ def main():
         centroid = processApplication(application, inputFuzzySets, outputFuzzySets, rules)
         outputFile.write(application.appId + " " + str(centroid)+ "\n")
     outputFile.close()
+    plt.show()
 
 
 def fuzzify(app, inputFuzzySets):
@@ -51,7 +54,34 @@ def processApplication(app, inputFuzzySets, outputFuzzySets, rules):
         appOutY = composition(r, appOutY)
     # step 3: defuzzification
     centroid = skf.centroid(appOutX, appOutY)
+
+    # Plot the aggregated function for each application
+    plt.figure()
+    plt.plot(appOutX, appOutY, label='Aggregated Function')
+    plt.title(f'Aggregated Function for Application {app.appId}')
+    plt.xlabel('Universe')
+    plt.ylabel('Membership Degree')
+    plt.legend()
     return (centroid)
 
 
+def plot_fuzzy_sets_by_category(fuzzy_sets):
+    # Encuentra las categorías únicas
+    categories = set(fs.var for fs in fuzzy_sets.values())
+
+    # Graficar cada categoría en una figura separada
+    for category in categories:
+        plt.figure(figsize=(8, 4))
+        for setid, fs in fuzzy_sets.items():
+            if fs.var == category:
+                plt.plot(fs.x, fs.y, label=f'{fs.label}')
+        plt.title(f"Fuzzy Sets for {category}")
+        plt.xlabel("Universe")
+        plt.ylabel("Membership degree")
+        plt.legend()
+
+
+
+
 main()
+
