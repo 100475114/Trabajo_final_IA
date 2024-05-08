@@ -39,6 +39,8 @@ def evaluateConsequent(rule, outputFuzzySets):
 def composition(rule, appOutY):
     return np.maximum(rule.consequentY, appOutY)
 
+import os
+
 def processApplication(app, inputFuzzySets, outputFuzzySets, rules):
     appOutX = outputFuzzySets[list(outputFuzzySets.keys())[0]].x  # Assuming all output fuzzy sets share the same universe
     appOutY = np.zeros_like(appOutX)
@@ -62,6 +64,10 @@ def processApplication(app, inputFuzzySets, outputFuzzySets, rules):
     plt.xlabel('Universe')
     plt.ylabel('Membership Degree')
     plt.legend()
+    if not os.path.exists('figuras'):
+        os.makedirs('figuras')
+    plt.savefig(f'figuras/Aggregated_Function_{app.appId}.png')
+    plt.close()
     return (centroid)
 
 
@@ -79,9 +85,10 @@ def plot_fuzzy_sets_by_category(fuzzy_sets):
         plt.xlabel("Universe")
         plt.ylabel("Membership degree")
         plt.legend()
-
-
-
+        if not os.path.exists('figuras'):
+            os.makedirs('figuras')
+        plt.savefig(f'figuras/Fuzzy_Sets_{category}.png')
+        plt.close()
 
 main()
 
